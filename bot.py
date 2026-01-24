@@ -89,7 +89,8 @@ def get_emotional_response(user_text):
     polarity = analysis.sentiment.polarity
     emotions = {
         "anxious": ["anxious", "worried", "nervous", "panic", "scared", "fear", "tension"],
-        "sad": ["sad", "depressed", "lonely", "unhappy", "hopeless", "crying", "heartbroken"],
+        "sad": ["sad", "unhappy", "crying", "heartbroken", "gloomy"],
+        "depressed": ["depressed", "hopeless", "worthless", "empty", "no point", "miserable", "lonely"],
         "angry": ["angry", "furious", "annoyed", "frustrated", "mad", "hate"],
         "tired": ["tired", "exhausted", "burnt out", "no energy", "drained"],
         "happy": ["happy", "great", "wonderful", "good", "excited", "blessed", "amazing", "well"]
@@ -101,17 +102,18 @@ def get_emotional_response(user_text):
             responses = {
                 "anxious": "I can feel the anxiety in your words. It's okay to feel overwhelmed; let's take this slowly.",
                 "sad": "I'm so sorry things feel heavy right now. Thank you for trusting me with your feelings.",
+                "depressed": "I hear how much pain you are in. Please know that you are not alone, and it takes immense strength to speak up when everything feels dark.",
                 "angry": "It sounds like you're carrying a lot of frustration. I'm here to listen without judgment.",
                 "tired": "You sound drained. Please remember that taking a break is a form of progress, too.",
                 "happy": "It's wonderful to hear that you're feeling good! I love hearing about those bright moments."
             }
             return responses[emotion]
             
-    # 2. Polarity Fallback
-    if polarity > 0.5:
+    # 2. Deep Polarity Fallback (Catching deep sadness without specific keywords)
+    if polarity < -0.6:
+        return "I can tell things are incredibly difficult for you right now. I'm here for you, and I'm ready to help in any way I can."
+    elif polarity > 0.5:
         return "You seem to be in a very positive headspace! That's fantastic to see."
-    elif polarity < -0.4:
-        return "I hear a lot of pain in your words. Thank you for being so open with me."
     
     return "Thank you for sharing that with me. It's helpful to know where you're at."
 
@@ -181,7 +183,7 @@ for m in st.session_state.messages:
 
 # Trigger Start
 if st.session_state.step == "START":
-    bot_echo("Hello! I'm MindCare. How have you been feeling lately?")
+    bot_echo("Hello! I'm MindCare. An AI bot for conducting guided screenings. How have you been feeling lately?")
     st.session_state.step = "GREETING"
     st.rerun()
 
