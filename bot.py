@@ -43,25 +43,53 @@ if "first_name" not in st.session_state:
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(page_title="MindCare AI", page_icon="🧠", layout="centered")
 
-# Custom CSS for UI and the Red Quit Button
+# Custom CSS for UI, Red Quit Button, and Mobile Responsiveness
 st.markdown("""
     <style>
+    /* Main Chat Bubbles */
     .stChatMessage { border-radius: 15px; margin-bottom: 15px; border: 1px solid #f0f2f6; }
-    .stButton button { width: 100%; border-radius: 12px; height: 3.5em; background-color: #4CAF50; color: white; }
+    
+    /* General Button Styling */
+    .stButton button { 
+        width: 100%; 
+        border-radius: 10px; 
+        height: 3em; 
+        background-color: #4CAF50; 
+        color: white; 
+        border: none;
+        transition: 0.3s;
+    }
+    
+    /* FORCE HORIZONTAL BUTTONS ON MOBILE */
+    [data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 5px !important;
+    }
+    [data-testid="stHorizontalBlock"] > div {
+        flex: 1 1 0% !important;
+        min-width: 0 !important;
+    }
+
     /* Red styling for the Quit Button */
     div.stButton > button:first-child[key*="quit"] {
         background-color: #ff4b4b;
-        border-color: #ff4b4b;
         margin-top: 10px;
     }
-    div.stButton > button:first-child[key*="quit"]:hover {
-        background-color: #ff3333;
-        color: white;
-    }
+    
     /* Style for the Sensor Button */
     div.stButton > button[key*="sensor"] {
         background-color: #2196F3;
-        border-color: #2196F3;
+    }
+
+    /* Adjusting text size for mobile buttons so labels don't clip */
+    @media (max-width: 480px) {
+        .stButton button {
+            font-size: 12px;
+            padding: 0px 2px;
+            height: 3.5em;
+        }
     }
     </style>
     """, unsafe_allow_html=True)
