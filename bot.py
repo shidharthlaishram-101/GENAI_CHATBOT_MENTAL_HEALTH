@@ -192,7 +192,8 @@ def get_emotional_response(user_text):
                 "anxious": "I can feel the anxiety in your words. It's okay to feel overwhelmed.",
                 "sad": "I'm so sorry things feel heavy right now.",
                 "depressed": "I hear how much pain you are in. It takes strength to speak up.",
-                "happy": "It's wonderful to hear that you're feeling good!"
+                "happy": "It's wonderful to hear that you're feeling good!",
+                "stressed": "Stress can be really tough to manage. I'm here to help you through it."
             }
             return responses[emotion], True
     if polarity < -0.3: return "I can tell things are difficult right now. I'm here for you.", True
