@@ -12,6 +12,34 @@ if not uid:
     st.error("User not authenticated. Please log in through the main application.")
     st.stop()
 
+if not firebase_admin._apps:
+    # ------------------------------------------------------------------
+    # Ensure you have your service account key file path correct if hosting locally ⬇️
+    # cred = credentials.Certificate("service_account.json")
+    # firebase_admin.initialize_app(cred)
+    # ------------------------------------------------------------------
+
+    # Using Streamlit Secrets for Firebase Initialization
+    firebase_secrets = dict(st.secrets["firebase"] )
+    firebase_secrets["private_key"] = firebase_secrets["private_key"].replace("\\n", "\n")
+
+    cred = credentials.Certificate(firebase_secrets)
+    firebase_admin.initialize_app(cred)
+
+db = firestore.client()
+
+# Fetch First Name from Firestore
+if "first_name" not in st.session_state:
+    try:
+        user_doc = db.collection("Users").document(uid).get()
+        if user_doc.exists:
+            # Safely get firstName or default to "Friend"
+            st.session_state.first_name = user_doc.to_dict().get("firstName", "Friend")
+        else:
+            st.session_state.first_name = "Friend"
+    except Exception:
+        st.session_state.first_name = "Friend"
+
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(page_title="MindCare AI", page_icon="🧠", layout="centered")
 
@@ -229,7 +257,8 @@ if st.session_state.pending_bot_responses:
     st.rerun()
 
 if st.session_state.step == "START":
-    st.session_state.pending_bot_responses = ["Hello! I'm MindCare. How have you been feeling lately?"]
+    name = st.session_state.first_name
+    st.session_state.pending_bot_responses = [f"Hello {name}! I'm MindCare. How have you been feeling lately?"]
     st.session_state.step = "GREETING"
     st.rerun()
 
