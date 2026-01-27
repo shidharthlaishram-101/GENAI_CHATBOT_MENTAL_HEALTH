@@ -183,7 +183,8 @@ def get_emotional_response(user_text):
         "anxious": ["anxious", "worried", "nervous", "panic"],
         "sad": ["sad", "unhappy", "crying"],
         "depressed": ["depressed", "hopeless", "worthless"],
-        "happy": ["happy", "great", "wonderful", "good", "fine", "okay"]
+        "happy": ["happy", "great", "wonderful", "good", "fine", "okay"],
+        "stressed": ["stressed", "overwhelmed", "tense"]
     }
     for emotion, keywords in emotions.items():
         if any(word in user_text.lower() for word in keywords):
