@@ -1,6 +1,16 @@
 import streamlit as st
 import time
 from textblob import TextBlob
+import firebase_admin
+from firebase_admin import credentials, firestore
+from datetime import datetime
+
+# 1. ---------------- User Authentication ----------------
+uid = st.query_params.get("userid")
+
+if not uid:
+    st.error("User not authenticated. Please log in through the main application.")
+    st.stop()
 
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(page_title="MindCare AI", page_icon="🧠", layout="centered")
