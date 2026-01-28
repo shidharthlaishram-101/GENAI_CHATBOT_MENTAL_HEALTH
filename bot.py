@@ -348,6 +348,20 @@ elif st.session_state.step == "RESULTS":
     # PSS-10 Threshold: 14+ indicates Moderate/High Stress
     if pss >= 14: distress_types.append("High Perceived Stress")
 
+    # Firebase Save Logic of the Assessment Summary 
+    if "assessment_saved" not in st.session_state:
+        try:
+            assessment_data = {
+                "uid": uid,
+                "firstName": st.session_state.first_name,
+                "distress_types": distress_types if distress_types else ["Normal/Low Distress"],
+                "timestamp": datetime.now(),
+            }
+            db.collection("Assessment_History").add(assessment_data)
+            st.session_state.assessment_saved = True
+        except Exception as e:
+            st.error(f"Error saving assessment data: {e}")
+
     st.divider()
 
     if distress_types:
