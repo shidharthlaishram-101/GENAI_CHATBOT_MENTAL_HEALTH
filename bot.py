@@ -257,6 +257,18 @@ def handle_input(val, display_question=None, display_answer=None):
                 st.session_state.current_tool = "PHQ9"
                 st.session_state.q_idx = 0
             else:
+                # K10 Low Distress Save Logic
+                try:
+                    assessment_data = {
+                        "uid": uid,
+                        "firstName": st.session_state.first_name,
+                        "distress_types": ["Normal/Low Distress"],
+                        "timestamp": datetime.now(),    
+                    }
+                    db.collection("Assessment_History").add(assessment_data)
+                except Exception as e:
+                    st.error(f"Error saving assessment data: {e}")
+        
                 st.session_state.pending_bot_responses = [f"K10 complete (Score: {st.session_state.k10_score}). Your distress levels appear low!"]
                 st.session_state.step = "END"
 
