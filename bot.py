@@ -396,11 +396,44 @@ elif st.session_state.step == "RESULTS":
         
         # Instructional diagram placeholder for user understanding
         # 
-        
-        if st.button("🔗 Proceed to Objective Sensor Assessment", key="sensor_btn"):
-            st.success("Module Loading: Calibrating GSR/ECG sensors...")
-            # Logic to trigger hardware integration or external dashboard
-            
+
+        if "show_sensor_instructions" not in st.session_state:
+            st.session_state.show_sensor_instructions = False
+
+        if st.button("Proceed to Sensor Testing", key="sensor_btn"):
+            st.session_state.show_sensor_instructions = True
+
+        if st.session_state.show_sensor_instructions:
+            st.success("Your wearable device setup is stating. Follow the steps below carefully:")
+
+        st.markdown("---")
+        st.markdown("### Wearable Device Setup Instructions:")
+
+        with st.expander("Step 1 - Prepare your device", expanded=True):
+            st.markdown("""
+            - Turn on the ESP32 microcontroller and ensure it's connected to the Wi-Fi network.
+            - Ensure your wearable device (GSR & ECG sensor) is ready to be attached.
+            - Clean the skin area where you'll place the sensors (usually wrists or chest) for better contact.
+            - Keep wrist or fingertips clean and dry.
+            """)        
+        with st.expander("Step 2 - Connect the Sensors", expanded=True):
+            st.markdown("""
+            - Attach the GSR sensor to your fingertips or wrist.
+            - Place the ECG electrodes on your chest as per the device instructions.
+            - Ensure all connections are secure for accurate readings.
+            """)
+        with st.expander("Step 3 - Start the Sensor Test", expanded=True):
+            st.markdown("""
+            - Once everything is set up, click the 'Start Sensor Test' button below.
+            - The test will run for approximately 5 minutes, during which you should remain as still and relaxed as possible.
+            - After the test, your physiological data will be analyzed to provide insights into your current stress levels.
+            """)
+            if st.button("Start Sensor Test", key="start_sensor"):
+                st.session_state.pending_bot_responses = ["Starting sensor test... Please remain still and relaxed while we collect your data. This may take a few minutes."]
+                st.session_state.step = "SENSOR_TEST"
+                st.rerun()
+
+
     else:
         st.success("✅ **Wellness Check:** Your scores do not meet the clinical threshold for significant distress at this time. Continue your current wellness practices!")
 
