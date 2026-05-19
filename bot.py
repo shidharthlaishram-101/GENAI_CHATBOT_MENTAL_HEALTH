@@ -2,7 +2,7 @@ import streamlit as st
 import time
 from textblob import TextBlob
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, firestore, db as rtdb
 from datetime import datetime
 
 # 1. ---------------- User Authentication ----------------
@@ -24,7 +24,9 @@ if not firebase_admin._apps:
     firebase_secrets["private_key"] = firebase_secrets["private_key"].replace("\\n", "\n")
 
     cred = credentials.Certificate(firebase_secrets)
-    firebase_admin.initialize_app(cred)
+    firebase_admin.initialize_app(cred, {
+        "databaseURL": "https://mindcare-97d3b-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    })
 
 db = firestore.client()
 
@@ -432,7 +434,95 @@ elif st.session_state.step == "RESULTS":
                 st.session_state.pending_bot_responses = ["Starting sensor test... Please remain still and relaxed while we collect your data. This may take a few minutes."]
                 st.session_state.step = "SENSOR_TEST"
                 st.rerun()
+            
+            elif st.session_state.step == "SENSOR_TEST":
+                st.title(" Sensor Analysis")
 
+                if "sensor_phase" not in st.session_state:
+                    st.session_state.sensor_phase = "WAITING"
+                
+                phase = st.session_state.sensor_phase
+
+                if phase == "WAITING":
+                    st.info("Waiting for sensor data processing... Please remain still.")
+
+                    with st.spinner("Checking database for results..."):
+                        time.sleep(3)
+                        try:
+                            stress_ref = rtdb.reference(f"stress_monitoring/latest")
+                            stress_results = stress_ref.get()
+
+                            anxiety_ref = rtdb.reference(f"anxiety_monitoring/latest")
+                            anxiety_results = anxiety_ref.get()
+
+
+
+                            if stress_results and anxiety_results:
+                                st.session_state.sensor_result = {
+                                    "stress_status": stress_results.get("Stress_status", "Unknown"),
+                                    "anxiety_status": anxiety_results.get("Anxiety_status", "Unknown")
+                                }
+                                st.session_state.sensor_phase = "DONE"
+                                st.rerun()
+                            else:
+                                st.warning("Results not available yet. Please ensure your sensor pipeline has completed.")
+                                if st.button("Check again"):
+                                    st.rerun()
+                        except Exception as e:
+                            st.error(f"Error fetching sensor results: {e}")
+                
+                elif phase == "DONE":
+                    result = st.session_state.sensor_result
+                    stress = result.get("stress_status", "Unknown")
+                    anxiety = result.get("anxiety_status", "Unknown")
+
+                    st.success("ML Model Classification Completed!")
+                    st.divider()
+
+                    c1, c2 = st.columns(2)
+
+                    with c1:
+                        st.markdown("Stress Status")
+                        if stress == "Stress":
+                            st.error(f"⚠️ {stress}")
+                        else:
+                            st.success(f"✅ {stress}")
+                    
+                    with c2:
+                        st.markdown("Anxiety Status")
+                        if anxiety == "Anxiety":
+                            st.error(f"⚠️ {anxiety}")
+                        else:
+                            st.success(f"✅ {anxiety}")
+                    
+                    st.divider()
+
+                    if stress == "Stress" and anxiety == "Anxiety":
+                        st.warning("⚠️ Both stress and anxiety indicators are elevated. We strongly recommend speaking with a mental health professional.")
+                    elif stress == "Stress":
+                        st.warning("⚠️ Stress indicators are elevated. Consider relaxation techniques and monitoring your workload.")
+                    elif anxiety == "Anxiety":
+                        st.warning("⚠️ Anxiety indicators are elevated. Breathing exercises and mindfulness may help.")
+                    else:
+                        st.success("✅ No significant stress or anxiety detected. Keep up your healthy habits!")
+
+                    st.divider()
+
+                    if "sensor_saved" not in st.session_state:
+                        try:
+                            db.collection("Sensor_Results").add({
+                                "uid": uid,
+                                "firstName": st.session_state.first_name,
+                                "stress_status": stress,
+                                "anxiety_status": anxiety,
+                                "timestamp": datetime.now(),
+                            })
+                            st.session_state.sensor_saved = True
+                        except Exception as e:
+                            st.error(f"Error saving sensor results: {e}")
+                    
+                    if st.button("Restart Assessment"):
+                        reset_session()
 
     else:
         st.success("✅ **Wellness Check:** Your scores do not meet the clinical threshold for significant distress at this time. Continue your current wellness practices!")
