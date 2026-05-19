@@ -400,8 +400,8 @@ elif st.session_state.step == "RESULTS":
         if "show_sensor_instructions" not in st.session_state:
             st.session_state.show_sensor_instructions = False
 
-        if st.button("Proceed to Sensor Testing", key="sensor_btn"):
-            st.session_state.show_sensor_instructions = True
+        # if st.button("Proceed to Sensor Testing", key="sensor_btn"):
+        #     st.session_state.show_sensor_instructions = True
 
         if st.session_state.show_sensor_instructions:
             st.success("Your wearable device setup is stating. Follow the steps below carefully:")
