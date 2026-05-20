@@ -438,6 +438,7 @@ elif st.session_state.step == "RESULTS":
             - After the test, your physiological data will be analyzed to provide insights into your current stress levels.
             """)
         if st.button("Start Sensor Test", key="start_sensor"):
+            st.info("Initiating sensor test... Please follow the instructions and remain still.")
             st.session_state.sensor_phase = "WAITING"
             st.session_state.step = "SENSOR_TEST"
             st.rerun()
