@@ -166,6 +166,8 @@ if "tier2_scores" not in st.session_state: st.session_state.tier2_scores = {"PHQ
 if "current_tool" not in st.session_state: st.session_state.current_tool = "PHQ9"
 if "pending_bot_responses" not in st.session_state: st.session_state.pending_bot_responses = []
 
+
+
 # ---------------- INTENT ENGINE ----------------
 def check_intent(user_text):
     text = user_text.lower().strip()
@@ -362,6 +364,8 @@ elif st.session_state.step == "RESULTS":
     # PSS-10 Threshold: 14+ indicates Moderate/High Stress
     if pss >= 14: distress_types.append("High Perceived Stress")
 
+    st.session_state.distress_types = distress_types
+
     # Firebase Save Logic of the Assessment Summary 
     if "assessment_saved" not in st.session_state:
         try:
@@ -377,6 +381,8 @@ elif st.session_state.step == "RESULTS":
             st.error(f"Error saving assessment data: {e}")
 
     st.divider()
+
+    distress_types = st.session_state.get("distress_types", [])
 
     if distress_types:
         st.warning(f"⚠️ **Clinical Indicator:** Your responses show indicators primarily associated with: **{', '.join(distress_types)}**.")
@@ -432,10 +438,11 @@ elif st.session_state.step == "RESULTS":
             """)
             if st.button("Start Sensor Test", key="start_sensor"):
                 st.session_state.pending_bot_responses = ["Starting sensor test... Please remain still and relaxed while we collect your data. This may take a few minutes."]
+                st.session_state.sensor_phase = "WAITING"
                 st.session_state.step = "SENSOR_TEST"
                 st.rerun()
             
-            elif st.session_state.step == "SENSOR_TEST":
+            if st.session_state.step == "SENSOR_TEST":
                 st.title(" Sensor Analysis")
 
                 if "sensor_phase" not in st.session_state:
@@ -476,7 +483,7 @@ elif st.session_state.step == "RESULTS":
                     stress = result.get("stress_status", "Unknown")
                     anxiety = result.get("anxiety_status", "Unknown")
 
-                    st.success("ML Model Classification Completed!")
+                    st.success("Classification Completed!")
                     st.divider()
 
                     c1, c2 = st.columns(2)
@@ -523,6 +530,8 @@ elif st.session_state.step == "RESULTS":
                     
                     if st.button("Restart Assessment"):
                         reset_session()
+                
+                st.stop()
 
     else:
         st.success("✅ **Wellness Check:** Your scores do not meet the clinical threshold for significant distress at this time. Continue your current wellness practices!")
