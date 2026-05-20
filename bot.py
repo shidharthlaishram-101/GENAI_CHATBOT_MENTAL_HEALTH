@@ -437,10 +437,11 @@ elif st.session_state.step == "RESULTS":
             - The test will run for approximately 5 minutes, during which you should remain as still and relaxed as possible.
             - After the test, your physiological data will be analyzed to provide insights into your current stress levels.
             """)
-        if st.button("Start Sensor Test", key="start_sensor"):
-            st.session_state.sensor_phase = "WAITING"
-            st.session_state.step = "SENSOR_TEST"
-            # st.rerun()
+        if st.session_state.step != "SENSOR_TEST":
+            if st.button("Start Sensor Test", key="start_sensor"):
+                st.session_state.sensor_phase = "WAITING"
+                st.session_state.step = "SENSOR_TEST"
+                # st.rerun()
         
     else:
         st.success("✅ **Wellness Check:** Your scores do not meet the clinical threshold for significant distress at this time. Continue your current wellness practices!")
