@@ -443,7 +443,7 @@ elif st.session_state.step == "RESULTS":
                 st.rerun()
             
             if st.session_state.step == "SENSOR_TEST":
-                st.title(" Sensor Analysis")
+                st.title("Sensor Analysis")
 
                 if "sensor_phase" not in st.session_state:
                     st.session_state.sensor_phase = "WAITING"
