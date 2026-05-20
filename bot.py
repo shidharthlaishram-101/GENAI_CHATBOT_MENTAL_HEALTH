@@ -159,7 +159,7 @@ tier2_data = {
 
 # ---------------- SESSION STATE ----------------
 if "messages" not in st.session_state: st.session_state.messages = []
-if "step" not in st.session_state: st.session_state.step = "START" # Change to "START" for actual flow, set to SENSOR_TEST for testing purposes
+if "step" not in st.session_state: st.session_state.step = "SENSOR_TEST" # Change to "START" for actual flow, set to SENSOR_TEST for testing purposes
 if "sensor_phase" not in st.session_state: st.session_state.sensor_phase = "WAITING"
 if "q_idx" not in st.session_state: st.session_state.q_idx = 0
 if "k10_score" not in st.session_state: st.session_state.k10_score = 0
@@ -459,30 +459,48 @@ if st.session_state.step == "SENSOR_TEST":
     if phase == "WAITING":
         st.info("Waiting for sensor data processing... Please remain still.")
 
-        with st.spinner("Checking database for results..."):
-            time.sleep(3)
-            try:
-                stress_ref = rtdb.reference(f"stress_monitoring/latest")
-                stress_results = stress_ref.get()
+        st.markdown("Fetching your physiological data...")
 
-                anxiety_ref = rtdb.reference(f"anxiety_monitoring/latest")
-                anxiety_results = anxiety_ref.get()
+        progress = st.progress(0)
+        status = st.empty()
+
+        stages = [
+            (15, "Connecting to Firebase..."),
+            (30, "Reaching stress monitoring node..."),
+            (50, "Fetching stress classification..."),
+            (65, "Reaching anxiety monitoring node..."),
+            (80, "Fetching anxiety classification..."),
+            (95, "Processing ML model results..."),
+            (100, "Done! Loading your results..."),
+        ]
+
+        for pct, msg in stages:
+            time.sleep(1.2)
+            progress.progress(pct, text=msg)
+            status.markdown(f"{msg}")
+
+        try:
+            stress_ref = rtdb.reference(f"stress_monitoring/latest")
+            stress_results = stress_ref.get()
+
+            anxiety_ref = rtdb.reference(f"anxiety_monitoring/latest")
+            anxiety_results = anxiety_ref.get()
 
 
 
-                if stress_results and anxiety_results:
-                    st.session_state.sensor_result = {
-                        "stress_status": stress_results.get("Stress_Status", "Unknown"),
-                        "anxiety_status": anxiety_results.get("Anxiety_Status", "Unknown")
-                    }
-                    st.session_state.sensor_phase = "DONE"
+            if stress_results and anxiety_results:
+                st.session_state.sensor_result = {
+                    "stress_status": stress_results.get("Stress_Status", "Unknown"),
+                    "anxiety_status": anxiety_results.get("Anxiety_Status", "Unknown")
+                }
+                st.session_state.sensor_phase = "DONE"
+                st.rerun()
+            else:
+                st.warning("Results not available yet. Please ensure your sensor pipeline has completed.")
+                if st.button("Check again"):
                     st.rerun()
-                else:
-                    st.warning("Results not available yet. Please ensure your sensor pipeline has completed.")
-                    if st.button("Check again"):
-                            st.rerun()
-            except Exception as e:
-                st.error(f"Error fetching sensor results: {e}")
+        except Exception as e:
+            st.error(f"Error fetching sensor results: {e}")
         
     elif phase == "DONE":
         result = st.session_state.sensor_result
