@@ -159,7 +159,7 @@ tier2_data = {
 
 # ---------------- SESSION STATE ----------------
 if "messages" not in st.session_state: st.session_state.messages = []
-if "step" not in st.session_state: st.session_state.step = "SENSOR_TEST" # Change to "START" for actual flow, set to SENSOR_TEST for testing purposes
+if "step" not in st.session_state: st.session_state.step = "START" # Change to "START" for actual flow, set to SENSOR_TEST for testing purposes
 if "sensor_phase" not in st.session_state: st.session_state.sensor_phase = "WAITING"
 if "q_idx" not in st.session_state: st.session_state.q_idx = 0
 if "k10_score" not in st.session_state: st.session_state.k10_score = 0
