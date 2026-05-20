@@ -477,7 +477,7 @@ if st.session_state.step == "SENSOR_TEST":
         for pct, msg in stages:
             time.sleep(1.2)
             progress.progress(pct, text=msg)
-            status.markdown(f"{msg}")
+            # status.markdown(f"{msg}")
 
         try:
             stress_ref = rtdb.reference(f"stress_monitoring/latest")
