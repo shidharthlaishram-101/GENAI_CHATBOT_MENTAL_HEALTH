@@ -481,13 +481,13 @@ if st.session_state.step == "SENSOR_TEST":
         status = st.empty()
 
         stages = [
-            (15, "Connecting to Firebase..."),
-            (30, "Reaching stress monitoring node..."),
-            (50, "Fetching stress classification..."),
-            (65, "Reaching anxiety monitoring node..."),
-            (80, "Fetching anxiety classification..."),
-            (95, "Processing ML model results..."),
-            (100, "Done! Loading your results..."),
+            (15, "Loading your results..."),
+            (30, "Loading your results..."),
+            (50, "Loading your results..."),
+            (65, "Loading your results..."),
+            (80, "Loading your results..."),
+            (95, "Loading your results..."),
+            (100, "Loading your results..."),
         ]
 
         for pct, msg in stages:
