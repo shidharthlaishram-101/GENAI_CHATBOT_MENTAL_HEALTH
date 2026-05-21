@@ -159,7 +159,7 @@ tier2_data = {
 
 # ---------------- SESSION STATE ----------------
 if "messages" not in st.session_state: st.session_state.messages = []
-if "step" not in st.session_state: st.session_state.step = "START" # Change to "START" for actual flow, set to SENSOR_TEST for testing purposes
+if "step" not in st.session_state: st.session_state.step = "SENSOR_TEST" # Change to "START" for actual flow, set to SENSOR_TEST for testing sensor analysis purposes
 if "sensor_phase" not in st.session_state: st.session_state.sensor_phase = "WAITING"
 if "q_idx" not in st.session_state: st.session_state.q_idx = 0
 if "k10_score" not in st.session_state: st.session_state.k10_score = 0
@@ -439,6 +439,11 @@ elif st.session_state.step == "RESULTS":
             """)
         if st.session_state.step != "SENSOR_TEST":
             if st.button("Start Sensor Test", key="start_sensor"):
+                rtdb.reference(f"active_session/{uid}").set({
+                    "uid": uid,
+                    "timestamp": datetime.now().isoformat(),
+                    "status": "pending"
+                })
                 st.session_state.sensor_phase = "WAITING"
                 st.session_state.step = "SENSOR_TEST"
                 # st.rerun()
@@ -481,10 +486,10 @@ if st.session_state.step == "SENSOR_TEST":
             # status.markdown(f"{msg}")
 
         try:
-            stress_ref = rtdb.reference(f"stress_monitoring/latest")
+            stress_ref = rtdb.reference(f"stress_monitoring/{uid}/latest")
             stress_results = stress_ref.get()
 
-            anxiety_ref = rtdb.reference(f"anxiety_monitoring/latest")
+            anxiety_ref = rtdb.reference(f"anxiety_monitoring/{uid}/latest")
             anxiety_results = anxiety_ref.get()
 
 
