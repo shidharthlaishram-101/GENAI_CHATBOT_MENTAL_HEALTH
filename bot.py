@@ -167,16 +167,19 @@ if "tier2_scores" not in st.session_state: st.session_state.tier2_scores = {"PHQ
 if "current_tool" not in st.session_state: st.session_state.current_tool = "PHQ9"
 if "pending_bot_responses" not in st.session_state: st.session_state.pending_bot_responses = []
 
-# if "active_session_write" not in st.session_state:
-#     try:
-#         rtdb.reference(f"active_session/{uid}").set({
-#             "uid": uid,
-#             "timestamp": datetime.now().isoformat(),
-#             "status": "pending"
-#         })
-#         st.session_state.active_session_write= True
-#     except Exception as e:
-#         st.error(f"Error writing active session data: {e}")
+if "active_session_write" not in st.session_state:
+    try:
+        existing = rtdb.reference(f"active_session/{uid}").get()
+
+        if not existing or existing.get("status") != "completed":
+            rtdb.reference(f"active_session/{uid}").set({
+            "uid": uid,
+            "timestamp": datetime.now().isoformat(),
+            "status": "pending"
+        })
+        st.session_state.active_session_write= True
+    except Exception as e:
+        st.error(f"Error writing active session data: {e}")
 
 
 # ---------------- INTENT ENGINE ----------------
@@ -473,6 +476,24 @@ if st.session_state.step == "SENSOR_TEST":
     phase = st.session_state.sensor_phase
 
     if phase == "WAITING":
+
+        # Check if results already exist in RTDB.
+        try:
+            existing_stress = rtdb.reference(f"stress_monitoring/{uid}latest").get()
+            existing_anxiety = rtdb.reference(f"anxiety_monitoring/{uid}/latest").get()
+
+            if existing_stress and existing_anxiety:
+                st.session_state.sensor_result = {
+                    "stress_status": existing_stress.get("Stress_Status", "Unknown"),
+                    "anxiety_status": existing_anxiety.get("Anxiety_Status", "Unknown")
+                }
+                st.session_state.sensor_phase = "DONE"
+                st.rerun()
+        except Exception as e:
+            st.error(f"Error checking existing sensor results: {e}")
+
+
+        # ONLY RUN THIS IF NO EXISTING RESULTS FOUND
         st.info("Waiting for sensor data processing... Please remain still.")
 
         st.markdown("Fetching your physiological data...")
@@ -496,10 +517,10 @@ if st.session_state.step == "SENSOR_TEST":
             # status.markdown(f"{msg}")
 
         try:
-            stress_ref = rtdb.reference(f"stress_monitoring/{uid}")
+            stress_ref = rtdb.reference(f"stress_monitoring/{uid}latest")
             stress_results = stress_ref.get()
 
-            anxiety_ref = rtdb.reference(f"anxiety_monitoring/{uid}")
+            anxiety_ref = rtdb.reference(f"anxiety_monitoring/{uid}/latest")
             anxiety_results = anxiety_ref.get()
 
 
