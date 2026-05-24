@@ -532,6 +532,11 @@ if st.session_state.step == "SENSOR_TEST":
             st.error(f"Error fetching sensor results: {e}")
         
     elif phase == "DONE":
+
+        if "sensor_result" not in st.session_state:
+            st.session_state.sensor_result = "WAITING"
+            st.rerun()
+
         result = st.session_state.sensor_result
         stress = result.get("stress_status", "Unknown")
         anxiety = result.get("anxiety_status", "Unknown")
