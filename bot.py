@@ -167,16 +167,16 @@ if "tier2_scores" not in st.session_state: st.session_state.tier2_scores = {"PHQ
 if "current_tool" not in st.session_state: st.session_state.current_tool = "PHQ9"
 if "pending_bot_responses" not in st.session_state: st.session_state.pending_bot_responses = []
 
-if "active_session_write" not in st.session_state:
-    try:
-        rtdb.reference(f"active_session/{uid}").set({
-            "uid": uid,
-            "timestamp": datetime.now().isoformat(),
-            "status": "pending"
-        })
-        st.session_state.active_session_write= True
-    except Exception as e:
-        st.error(f"Error writing active session data: {e}")
+# if "active_session_write" not in st.session_state:
+#     try:
+#         rtdb.reference(f"active_session/{uid}").set({
+#             "uid": uid,
+#             "timestamp": datetime.now().isoformat(),
+#             "status": "pending"
+#         })
+#         st.session_state.active_session_write= True
+#     except Exception as e:
+#         st.error(f"Error writing active session data: {e}")
 
 
 # ---------------- INTENT ENGINE ----------------
@@ -496,10 +496,10 @@ if st.session_state.step == "SENSOR_TEST":
             # status.markdown(f"{msg}")
 
         try:
-            stress_ref = rtdb.reference(f"stress_monitoring/{uid}/latest")
+            stress_ref = rtdb.reference(f"stress_monitoring/{uid}")
             stress_results = stress_ref.get()
 
-            anxiety_ref = rtdb.reference(f"anxiety_monitoring/{uid}/latest")
+            anxiety_ref = rtdb.reference(f"anxiety_monitoring/{uid}")
             anxiety_results = anxiety_ref.get()
 
 
