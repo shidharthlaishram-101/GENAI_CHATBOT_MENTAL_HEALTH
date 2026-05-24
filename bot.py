@@ -171,7 +171,7 @@ if "active_session_write" not in st.session_state:
     try:
         existing = rtdb.reference(f"active_session/{uid}").get()
 
-        if not existing or existing.get("status") != "completed":
+        if not existing or existing.get("status") != "done":
             rtdb.reference(f"active_session/{uid}").set({
             "uid": uid,
             "timestamp": datetime.now().isoformat(),
