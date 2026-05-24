@@ -578,17 +578,8 @@ if st.session_state.step == "SENSOR_TEST":
 
             else:
                 st.warning("⚠️ Results not available yet.")
-                col1, col2 = st.columns(2)
-                with col1:
-                    if st.button("🔄 Check Again", key="check_again"):
-                        st.rerun()
-                with col2:
-                    if st.button("❌ Cancel & Go Back", key="cancel_sensor"):
-                        # Remove from queue
-                        rtdb.reference(f"active_session/{uid}").delete()
-                        st.session_state.sensor_phase = "WAITING"
-                        st.session_state.step = "RESULTS"
-                        st.rerun()
+                if st.button("🔄 Check Again", key="check_again"):
+                    st.rerun()
 
         except Exception as e:
             st.error(f"Error fetching sensor results: {e}")
