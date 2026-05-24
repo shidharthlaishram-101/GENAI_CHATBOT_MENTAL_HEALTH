@@ -452,15 +452,28 @@ elif st.session_state.step == "RESULTS":
             """)
         if st.session_state.step != "SENSOR_TEST":
             if st.button("Start Sensor Test", key="start_sensor"):
-                rtdb.reference(f"active_session/{uid}").set({
-                    "uid": uid,
-                    # "timestamp": datetime.now().isoformat(),
-                    "status": "pending"
-                })
-                st.session_state.sensor_phase = "WAITING"
-                st.session_state.step = "SENSOR_TEST"
-                # st.rerun()
-        
+                try:
+                    all_sessions = rtdb.reference("active_session").get() or {}
+
+                    someone_active = any(
+                        s.get("status") in ["pending", "processing"]
+                        for s in all_sessions.values()
+                        if isinstance(s, dict) and s.get("uid") != uid
+                    )
+
+                    if someone_active:
+                        st.warning("⚠️ Another user is currently undergoing sensor testing. Please wait a moment and try again.")
+                    else:
+                        rtdb.reference(f"active_session/{uid}").set({
+                        "uid": uid,
+                        "timestamp": datetime.now().isoformat(),
+                        "status": "pending"
+                        })
+                        st.session_state.sensor_phase = "WAITING"
+                        st.session_state.step = "SENSOR_TEST"
+                        # st.rerun()
+                except Exception as e:
+                    st.error(f"Error initiating sensor test: {e}")
     else:
         st.success("✅ **Wellness Check:** Your scores do not meet the clinical threshold for significant distress at this time. Continue your current wellness practices!")
     
@@ -477,15 +490,15 @@ if st.session_state.step == "SENSOR_TEST":
 
     if phase == "WAITING":
 
+        # ✅ Check if results already exist
         try:
             existing_stress  = rtdb.reference(f"stress_monitoring/{uid}/latest").get()
             existing_anxiety = rtdb.reference(f"anxiety_monitoring/{uid}/latest").get()
 
-            # ✅ Only proceed if BOTH have valid data with expected fields
             if (existing_stress and existing_anxiety and
                 "Stress_Status" in existing_stress and
                 "Anxiety_Status" in existing_anxiety):
-                
+
                 st.session_state.sensor_result = {
                     "stress_status":  existing_stress.get("Stress_Status", "Unknown"),
                     "anxiety_status": existing_anxiety.get("Anxiety_Status", "Unknown")
@@ -494,13 +507,45 @@ if st.session_state.step == "SENSOR_TEST":
                 st.rerun()
 
         except Exception as e:
-            st.error(f"Error checking existing sensor results: {e}")
+            st.error(f"Error checking existing results: {e}")
 
-        # Animation and fetch below only runs if no valid data found above
-        st.info("⏳ Waiting for sensor data processing... Please remain still.")
+        # ✅ Check queue position
+        try:
+            all_sessions = rtdb.reference("active_session").get() or {}
+            
+            # Get own session status
+            own_session = all_sessions.get(uid, {})
+            own_status  = own_session.get("status", "pending") if isinstance(own_session, dict) else "pending"
+
+            # Count users ahead in queue
+            pending_ahead = [
+                s for s in all_sessions.values()
+                if isinstance(s, dict)
+                and s.get("status") in ["pending", "processing"]
+                and s.get("uid") != uid
+            ]
+            queue_position = len(pending_ahead) + 1  # 1 = next in line
+
+            if own_status == "processing":
+                st.success("✅ Your session is currently being processed by the sensor!")
+                st.info("⏳ Please remain still. Results will appear shortly.")
+
+            elif queue_position == 1:
+                st.info("⏳ You are **next in line**. The sensor will begin your session shortly.")
+
+            else:
+                st.warning(f"🕐 You are number **{queue_position}** in the queue. Please wait your turn.")
+                st.info("The sensor is currently processing another user. You will be notified when it's your turn.")
+
+        except Exception as e:
+            st.error(f"Error checking queue: {e}")
+
+        st.divider()
+
+        # ✅ Animation
         st.markdown("#### 📡 Fetching your physiological data...")
-
         progress = st.progress(0)
+
         stages = [
             (15, "🔌 Connecting to Firebase..."),
             (30, "📡 Reaching stress monitoring node..."),
@@ -510,10 +555,12 @@ if st.session_state.step == "SENSOR_TEST":
             (95, "⚙️ Processing ML model results..."),
             (100, "✅ Done! Loading your results..."),
         ]
+
         for pct, msg in stages:
             time.sleep(1.2)
             progress.progress(pct, text=msg)
 
+        # ✅ Final fetch after animation
         try:
             stress_results  = rtdb.reference(f"stress_monitoring/{uid}/latest").get()
             anxiety_results = rtdb.reference(f"anxiety_monitoring/{uid}/latest").get()
@@ -528,17 +575,27 @@ if st.session_state.step == "SENSOR_TEST":
                 }
                 st.session_state.sensor_phase = "DONE"
                 st.rerun()
+
             else:
-                st.warning("⚠️ Results not available yet. Please ensure your sensor pipeline has completed.")
-                if st.button("🔄 Check Again"):
-                    st.rerun()
+                st.warning("⚠️ Results not available yet.")
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("🔄 Check Again", key="check_again"):
+                        st.rerun()
+                with col2:
+                    if st.button("❌ Cancel & Go Back", key="cancel_sensor"):
+                        # Remove from queue
+                        rtdb.reference(f"active_session/{uid}").delete()
+                        st.session_state.sensor_phase = "WAITING"
+                        st.session_state.step = "RESULTS"
+                        st.rerun()
 
         except Exception as e:
             st.error(f"Error fetching sensor results: {e}")
 
     elif phase == "DONE":
 
-        # ✅ Safety check
+    # Safety check
         if "sensor_result" not in st.session_state or not isinstance(st.session_state.sensor_result, dict):
             st.session_state.sensor_phase = "WAITING"
             st.rerun()
@@ -547,25 +604,23 @@ if st.session_state.step == "SENSOR_TEST":
         stress  = result.get("stress_status", "Unknown")
         anxiety = result.get("anxiety_status", "Unknown")
 
-        st.success("Classification Completed!")
+        st.success("✅ Classification Completed!")
         st.divider()
 
         c1, c2 = st.columns(2)
-
         with c1:
-            st.markdown("Stress Status")
+            st.markdown("### 😰 Stress Status")
             if stress == "Stress":
-                st.error(f"⚠️ {stress}")
+                st.error(f"🔴 **{stress}**")
             else:
-                st.success(f"✅ {stress}")
-            
+                st.success(f"🟢 **{stress}**")
         with c2:
-            st.markdown("Anxiety Status")
+            st.markdown("### 😟 Anxiety Status")
             if anxiety == "Anxiety":
-                st.error(f"⚠️ {anxiety}")
+                st.error(f"🔴 **{anxiety}**")
             else:
-                st.success(f"✅ {anxiety}")
-            
+                st.success(f"🟢 **{anxiety}**")
+
         st.divider()
 
         if stress == "Stress" and anxiety == "Anxiety":
@@ -579,20 +634,28 @@ if st.session_state.step == "SENSOR_TEST":
 
         st.divider()
 
+        # ✅ Save to Firestore
         if "sensor_saved" not in st.session_state:
             try:
                 db.collection("Sensor_Results").add({
-                    "uid": uid,
-                    "firstName": st.session_state.first_name,
-                    "stress_status": stress,
+                    "uid":            uid,
+                    "firstName":      st.session_state.first_name,
+                    "stress_status":  stress,
                     "anxiety_status": anxiety,
-                    "timestamp": datetime.now(),
+                    "timestamp":      datetime.now(),
                 })
                 st.session_state.sensor_saved = True
             except Exception as e:
                 st.error(f"Error saving sensor results: {e}")
-            
-        if st.button("Restart Assessment"):
+
+        # ✅ Step 3 — Remove from active_session queue AFTER results are saved
+        if st.session_state.get("sensor_saved"):
+            try:
+                rtdb.reference(f"active_session/{uid}").delete()
+            except Exception as e:
+                st.error(f"Error clearing session queue: {e}")
+
+        if st.button("🔄 Restart Assessment"):
             reset_session()
             
     st.stop()
