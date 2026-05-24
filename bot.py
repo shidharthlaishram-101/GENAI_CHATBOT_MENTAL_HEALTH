@@ -642,9 +642,9 @@ if st.session_state.step == "SENSOR_TEST":
         # ✅ Step 3 — Remove from active_session queue AFTER results are saved
         if st.session_state.get("sensor_saved"):
             try:
-                rtdb.reference(f"active_session/{uid}").delete()
-                rtdb.reference(f"stress_monitoring/{uid}").delete()
-                rtdb.reference(f"anxiety_monitoring/{uid}").delete()
+                rtdb.reference(f"active_session/{uid}").set(None)
+                rtdb.reference(f"stress_monitoring/{uid}").set(None)
+                rtdb.reference(f"anxiety_monitoring/{uid}").set(None)
             except Exception as e:
                 st.error(f"Error clearing session data: {e}")
 
