@@ -167,19 +167,19 @@ if "tier2_scores" not in st.session_state: st.session_state.tier2_scores = {"PHQ
 if "current_tool" not in st.session_state: st.session_state.current_tool = "PHQ9"
 if "pending_bot_responses" not in st.session_state: st.session_state.pending_bot_responses = []
 
-if "active_session_write" not in st.session_state:
-    try:
-        existing = rtdb.reference(f"active_session/{uid}").get()
+# if "active_session_write" not in st.session_state:
+#     try:
+#         existing = rtdb.reference(f"active_session/{uid}").get()
 
-        if not existing or existing.get("status") != "done":
-            rtdb.reference(f"active_session/{uid}").set({
-            "uid": uid,
-            # "timestamp": datetime.now().isoformat(),
-            "status": "pending"
-        })
-        st.session_state.active_session_write= True
-    except Exception as e:
-        st.error(f"Error writing active session data: {e}")
+#         if not existing or existing.get("status") != "done":
+#             rtdb.reference(f"active_session/{uid}").set({
+#             "uid": uid,
+#             # "timestamp": datetime.now().isoformat(),
+#             "status": "pending"
+#         })
+#         st.session_state.active_session_write= True
+#     except Exception as e:
+#         st.error(f"Error writing active session data: {e}")
 
 
 # ---------------- INTENT ENGINE ----------------
@@ -542,19 +542,11 @@ if st.session_state.step == "SENSOR_TEST":
         st.markdown("#### 📡 Fetching your physiological data...")
         progress = st.progress(0)
 
-        stages = [
-            (15),
-            (30),
-            (50),
-            (65),
-            (80),
-            (95),
-            (100),
-        ]
+        stages = [15, 30, 50, 65, 80, 95, 100]
 
-        for pct, msg in stages:
+        for pct in stages:
             time.sleep(1.2)
-            progress.progress(pct, text=msg)
+            progress.progress(pct)
 
         # ✅ Final fetch after animation
         try:
@@ -625,7 +617,7 @@ if st.session_state.step == "SENSOR_TEST":
         # ✅ Save to Firestore then delete from RTDB
         if "sensor_saved" not in st.session_state:
             try:
-                db.collection("Sensor_Results").add({
+                doc_ref = db.collection("Sensor_Results").add({
                     "uid":            uid,
                     "firstName":      st.session_state.first_name,
                     "stress_status":  stress,
@@ -633,6 +625,7 @@ if st.session_state.step == "SENSOR_TEST":
                     "timestamp":      datetime.now(),
                 })
                 st.session_state.sensor_saved = True
+                st.session_state.sensor_doc_id = doc_ref[1].id
 
                 # ✅ Delete from RTDB after saving to Firestore
                 rtdb.reference(f"active_session/{uid}").set(None)
@@ -647,4 +640,3 @@ if st.session_state.step == "SENSOR_TEST":
             reset_session()
 
     st.stop()
-
