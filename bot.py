@@ -626,6 +626,7 @@ if st.session_state.step == "SENSOR_TEST":
         st.divider()
 
         # ✅ Save to Firestore
+        # ✅ Save to Firestore
         if "sensor_saved" not in st.session_state:
             try:
                 db.collection("Sensor_Results").add({
@@ -636,17 +637,14 @@ if st.session_state.step == "SENSOR_TEST":
                     "timestamp":      datetime.now(),
                 })
                 st.session_state.sensor_saved = True
-            except Exception as e:
-                st.error(f"Error saving sensor results: {e}")
 
-        # ✅ Step 3 — Remove from active_session queue AFTER results are saved
-        if st.session_state.get("sensor_saved"):
-            try:
+                # ✅ Delete immediately after saving — inside the same try block
                 rtdb.reference(f"active_session/{uid}").set(None)
                 rtdb.reference(f"stress_monitoring/{uid}").set(None)
                 rtdb.reference(f"anxiety_monitoring/{uid}").set(None)
+
             except Exception as e:
-                st.error(f"Error clearing session data: {e}")
+                st.error(f"Error saving/clearing session data: {e}")
 
         if st.button("🔄 Restart Assessment"):
             reset_session()
