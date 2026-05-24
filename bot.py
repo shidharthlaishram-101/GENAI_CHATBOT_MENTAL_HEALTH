@@ -628,7 +628,7 @@ if st.session_state.step == "SENSOR_TEST":
                 st.session_state.sensor_doc_id = doc_ref[1].id
 
                 # ✅ Delete from RTDB after saving to Firestore
-                rtdb.reference(f"active_session/{uid}").set(None)
+                rtdb.reference(f"active_session/{uid}").delete()
 
             except Exception as e:
                 st.error(f"Error saving results: {e}")
