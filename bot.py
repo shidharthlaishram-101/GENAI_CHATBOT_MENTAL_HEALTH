@@ -640,3 +640,5 @@ if st.session_state.step == "SENSOR_TEST":
             reset_session()
 
     st.stop()
+
+# END OF FILE
