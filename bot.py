@@ -159,7 +159,7 @@ tier2_data = {
 
 # ---------------- SESSION STATE ----------------
 if "messages" not in st.session_state: st.session_state.messages = []
-if "step" not in st.session_state: st.session_state.step = "SENSOR_TEST" # Change to "START" for actual flow, set to SENSOR_TEST for testing sensor analysis purposes
+if "step" not in st.session_state: st.session_state.step = "START" # Change to "START" for actual flow, set to SENSOR_TEST for testing sensor analysis purposes
 if "sensor_phase" not in st.session_state: st.session_state.sensor_phase = "WAITING"
 if "q_idx" not in st.session_state: st.session_state.q_idx = 0
 if "k10_score" not in st.session_state: st.session_state.k10_score = 0
@@ -167,19 +167,16 @@ if "tier2_scores" not in st.session_state: st.session_state.tier2_scores = {"PHQ
 if "current_tool" not in st.session_state: st.session_state.current_tool = "PHQ9"
 if "pending_bot_responses" not in st.session_state: st.session_state.pending_bot_responses = []
 
+# ✅ TESTING ONLY SENSOR ANALYSIS FLOW. Jumps straight to SENSOR_TEST skipping the RESULTS step entirely where the button lives. Change to "START" for actual flow.
 # if "active_session_write" not in st.session_state:
 #     try:
-#         existing = rtdb.reference(f"active_session/{uid}").get()
-
-#         if not existing or existing.get("status") != "done":
-#             rtdb.reference(f"active_session/{uid}").set({
-#             "uid": uid,
-#             # "timestamp": datetime.now().isoformat(),
+#         rtdb.reference(f"active_session/{uid}").set({
+#             "uid":    uid,
 #             "status": "pending"
 #         })
-#         st.session_state.active_session_write= True
+#         st.session_state.active_session_write = True
 #     except Exception as e:
-#         st.error(f"Error writing active session data: {e}")
+#         st.error(f"Error writing active session: {e}")
 
 
 # ---------------- INTENT ENGINE ----------------
