@@ -477,65 +477,57 @@ if st.session_state.step == "SENSOR_TEST":
 
     if phase == "WAITING":
 
-        # Check if results already exist in RTDB.
         try:
-            existing_stress = rtdb.reference(f"stress_monitoring/{uid}latest").get()
-            existing_anxiety = rtdb.reference(f"anxiety_monitoring/{uid}/latest").get()
+            existing_stress  = rtdb.reference(f"stress_monitoring/{uid}/latest").get()  # ✅ fixed
+            existing_anxiety = rtdb.reference(f"anxiety_monitoring/{uid}/latest").get() # ✅ already correct
 
             if existing_stress and existing_anxiety:
                 st.session_state.sensor_result = {
-                    "stress_status": existing_stress.get("Stress_Status", "Unknown"),
+                    "stress_status":  existing_stress.get("Stress_Status", "Unknown"),
                     "anxiety_status": existing_anxiety.get("Anxiety_Status", "Unknown")
                 }
-                st.session_state.sensor_phase = "DONE"
-                st.rerun()
+            st.session_state.sensor_phase = "DONE"
+            st.rerun()
         except Exception as e:
             st.error(f"Error checking existing sensor results: {e}")
 
-
-        # ONLY RUN THIS IF NO EXISTING RESULTS FOUND
-        st.info("Waiting for sensor data processing... Please remain still.")
-
-        st.markdown("Fetching your physiological data...")
+        st.info("⏳ Waiting for sensor data processing... Please remain still.")
+        st.markdown("#### 📡 Fetching your physiological data...")
 
         progress = st.progress(0)
-        status = st.empty()
 
         stages = [
-            (15, "Loading your results..."),
-            (30, "Loading your results..."),
-            (50, "Loading your results..."),
-            (65, "Loading your results..."),
-            (80, "Loading your results..."),
-            (95, "Loading your results..."),
-            (100, "Loading your results..."),
+            (15, "🔌 Connecting to Firebase..."),
+            (30, "📡 Reaching stress monitoring node..."),
+            (50, "🧠 Fetching stress classification..."),
+            (65, "💓 Reaching anxiety monitoring node..."),
+            (80, "🔍 Fetching anxiety classification..."),
+            (95, "⚙️ Processing ML model results..."),
+            (100, "✅ Done! Loading your results..."),
         ]
 
         for pct, msg in stages:
             time.sleep(1.2)
             progress.progress(pct, text=msg)
-            # status.markdown(f"{msg}")
 
         try:
-            stress_ref = rtdb.reference(f"stress_monitoring/{uid}latest")
-            stress_results = stress_ref.get()
-
-            anxiety_ref = rtdb.reference(f"anxiety_monitoring/{uid}/latest")
+            stress_ref  = rtdb.reference(f"stress_monitoring/{uid}/latest")  # ✅ fixed
+            anxiety_ref = rtdb.reference(f"anxiety_monitoring/{uid}/latest") # ✅ already correct
+            stress_results  = stress_ref.get()
             anxiety_results = anxiety_ref.get()
-
-
 
             if stress_results and anxiety_results:
                 st.session_state.sensor_result = {
-                    "stress_status": stress_results.get("Stress_Status", "Unknown"),
+                    "stress_status":  stress_results.get("Stress_Status", "Unknown"),
                     "anxiety_status": anxiety_results.get("Anxiety_Status", "Unknown")
                 }
                 st.session_state.sensor_phase = "DONE"
                 st.rerun()
             else:
-                st.warning("Results not available yet. Please ensure your sensor pipeline has completed.")
-                if st.button("Check again"):
+                st.warning("⚠️ Results not available yet. Please ensure your sensor pipeline has completed.")
+                if st.button("🔄 Check Again"):
                     st.rerun()
+
         except Exception as e:
             st.error(f"Error fetching sensor results: {e}")
         
