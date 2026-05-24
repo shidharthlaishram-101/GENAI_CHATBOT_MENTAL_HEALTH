@@ -174,7 +174,7 @@ if "active_session_write" not in st.session_state:
         if not existing or existing.get("status") != "done":
             rtdb.reference(f"active_session/{uid}").set({
             "uid": uid,
-            "timestamp": datetime.now().isoformat(),
+            # "timestamp": datetime.now().isoformat(),
             "status": "pending"
         })
         st.session_state.active_session_write= True
@@ -454,7 +454,7 @@ elif st.session_state.step == "RESULTS":
             if st.button("Start Sensor Test", key="start_sensor"):
                 rtdb.reference(f"active_session/{uid}").set({
                     "uid": uid,
-                    "timestamp": datetime.now().isoformat(),
+                    # "timestamp": datetime.now().isoformat(),
                     "status": "pending"
                 })
                 st.session_state.sensor_phase = "WAITING"
