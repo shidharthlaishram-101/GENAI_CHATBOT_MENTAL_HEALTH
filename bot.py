@@ -37,10 +37,16 @@ if "first_name" not in st.session_state:
         if user_doc.exists:
             # Safely get firstName or default to "Friend"
             st.session_state.first_name = user_doc.to_dict().get("firstName", "Friend")
+            st.session_state.age = user_doc.to_dict().get("age", "")
+            st.session_state.gender = user_doc.to_dict().get("gender", "")
         else:
             st.session_state.first_name = "Friend"
+            st.session_state.age = ""
+            st.session_state.gender = ""
     except Exception:
         st.session_state.first_name = "Friend"
+        st.session_state.age = ""
+        st.session_state.gender = ""
 
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(page_title="MindCare AI", page_icon="🧠", layout="centered")
@@ -464,6 +470,9 @@ elif st.session_state.step == "RESULTS":
                         # ✅ Write new structure — no stress_detected/anxiety_detected yet
                         rtdb.reference(f"active_session/{uid}").set({
                             "uid":    uid,
+                            "firstname": firstname,
+                            "age": age,
+                            "gender": gender,
                             "status": "pending"
                         })
                         st.session_state.sensor_phase = "WAITING"
