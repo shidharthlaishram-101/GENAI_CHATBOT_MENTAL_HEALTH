@@ -58,26 +58,28 @@ st.markdown("""
     .stChatMessage { border-radius: 15px; margin-bottom: 15px; border: 1px solid #f0f2f6; }
     
     /* General Button Styling */
-    .stButton button { 
-        width: 100%; 
-        border-radius: 10px; 
-        height: 3em; 
-        background-color: #4CAF50; 
-        color: white; 
-        border: none;
-        transition: 0.3s;
+    .stButton button {
+        width: 100%;
+        min-height: 56px;
+        border-radius: 14px;
+        font-size: 14px;
+        font-weight: 600;
+        padding: 10px 8px;
+        white-space: normal !important;
+        line-height: 1.2;
+        text-align: center;
     }
     
     /* FORCE HORIZONTAL BUTTONS ON MOBILE */
     [data-testid="stHorizontalBlock"] {
         display: flex !important;
-        flex-direction: row !important;
         flex-wrap: nowrap !important;
-        gap: 5px !important;
+        gap: 8px !important;
     }
+            
     [data-testid="stHorizontalBlock"] > div {
-        flex: 1 1 0% !important;
-        min-width: 0 !important;
+        flex: 1 1 calc(50%-8px)% !important;
+        min-width: 120px !important;
     }
 
     /* Red styling for the Quit Button */
