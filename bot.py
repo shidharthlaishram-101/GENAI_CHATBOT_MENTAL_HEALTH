@@ -470,10 +470,11 @@ elif st.session_state.step == "RESULTS":
                         # ✅ Write new structure — no stress_detected/anxiety_detected yet
                         rtdb.reference(f"active_session/{uid}").set({
                             "uid":    uid,
-                            "firstname": firstname,
-                            "age": age,
-                            "gender": gender,
-                            "status": "pending"
+                            "firstname": st.session_state.firstname,
+                            "age": st.session_state.age,
+                            "gender": st.session_state.gender,
+                            "status": "pending",
+                            "timestamp": datetime.now()
                         })
                         st.session_state.sensor_phase = "WAITING"
                         st.session_state.step = "SENSOR_TEST"
