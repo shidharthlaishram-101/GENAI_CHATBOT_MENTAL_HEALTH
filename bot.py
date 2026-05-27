@@ -60,26 +60,29 @@ st.markdown("""
     /* General Button Styling */
     .stButton button {
         width: 100%;
-        min-height: 56px;
+        min-height: 52px;
         border-radius: 14px;
+        background-color: #4CAF50;
+        color: white;
         font-size: 14px;
         font-weight: 600;
-        padding: 10px 8px;
+        padding: 6px;
         white-space: normal !important;
         line-height: 1.2;
-        text-align: center;
+        transition: 0.3s;
     }
     
     /* FORCE HORIZONTAL BUTTONS ON MOBILE */
     [data-testid="stHorizontalBlock"] {
         display: flex !important;
+        flex-direction: row !important;
         flex-wrap: nowrap !important;
-        gap: 8px !important;
+        gap: 5px !important;
     }
             
     [data-testid="stHorizontalBlock"] > div {
-        flex: 1 1 calc(50%-8px)% !important;
-        min-width: 120px !important;
+        flex: 1 1 0%!important;
+        min-width: 0 !important;
     }
 
     /* Red styling for the Quit Button */
@@ -96,9 +99,10 @@ st.markdown("""
     /* Adjusting text size for mobile buttons so labels don't clip */
     @media (max-width: 480px) {
         .stButton button {
-            font-size: 12px;
-            padding: 0px 2px;
-            height: 3.5em;
+            font-size: 11px !important;
+            min-height: 58px !important;
+            padding: 4px !important;
+            border-radius: 12px !important;
         }
     }
     </style>
