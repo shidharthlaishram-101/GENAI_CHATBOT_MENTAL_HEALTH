@@ -480,7 +480,7 @@ elif st.session_state.step == "RESULTS":
                             "age": st.session_state.age,
                             "gender": st.session_state.gender,
                             "status": "pending",
-                            "timestamp": datetime.now()
+                            "timestamp": datetime.now().isoformat()
                         })
                         st.session_state.sensor_phase = "WAITING"
                         st.session_state.step = "SENSOR_TEST"
