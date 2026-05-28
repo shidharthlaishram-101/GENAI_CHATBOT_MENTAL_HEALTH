@@ -476,7 +476,7 @@ elif st.session_state.step == "RESULTS":
                         # ✅ Write new structure — no stress_detected/anxiety_detected yet
                         rtdb.reference(f"active_session/{uid}").set({
                             "uid":    uid,
-                            "firstname": st.session_state.firstname,
+                            "firstname": st.session_state.first_name,
                             "age": st.session_state.age,
                             "gender": st.session_state.gender,
                             "status": "pending",
