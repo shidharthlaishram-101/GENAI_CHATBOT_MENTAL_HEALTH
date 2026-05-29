@@ -37,10 +37,16 @@ if "first_name" not in st.session_state:
         if user_doc.exists:
             # Safely get firstName or default to "Friend"
             st.session_state.first_name = user_doc.to_dict().get("firstName", "Friend")
+            st.session_state.age = user_doc.to_dict().get("age", "")
+            st.session_state.gender = user_doc.to_dict().get("gender", "")
         else:
             st.session_state.first_name = "Friend"
+            st.session_state.age = ""
+            st.session_state.gender = ""
     except Exception:
         st.session_state.first_name = "Friend"
+        st.session_state.age = ""
+        st.session_state.gender = ""
 
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(page_title="MindCare AI", page_icon="🧠", layout="centered")
@@ -52,13 +58,17 @@ st.markdown("""
     .stChatMessage { border-radius: 15px; margin-bottom: 15px; border: 1px solid #f0f2f6; }
     
     /* General Button Styling */
-    .stButton button { 
-        width: 100%; 
-        border-radius: 10px; 
-        height: 3em; 
-        background-color: #4CAF50; 
-        color: white; 
-        border: none;
+    .stButton button {
+        width: 100%;
+        min-height: 52px;
+        border-radius: 14px;
+        background-color: #4CAF50;
+        color: white;
+        font-size: 14px;
+        font-weight: 600;
+        padding: 6px;
+        white-space: normal !important;
+        line-height: 1.2;
         transition: 0.3s;
     }
     
@@ -69,8 +79,9 @@ st.markdown("""
         flex-wrap: nowrap !important;
         gap: 5px !important;
     }
+            
     [data-testid="stHorizontalBlock"] > div {
-        flex: 1 1 0% !important;
+        flex: 1 1 0%!important;
         min-width: 0 !important;
     }
 
@@ -88,9 +99,10 @@ st.markdown("""
     /* Adjusting text size for mobile buttons so labels don't clip */
     @media (max-width: 480px) {
         .stButton button {
-            font-size: 12px;
-            padding: 0px 2px;
-            height: 3.5em;
+            font-size: 11px !important;
+            min-height: 58px !important;
+            padding: 4px !important;
+            border-radius: 12px !important;
         }
     }
     </style>
@@ -464,7 +476,11 @@ elif st.session_state.step == "RESULTS":
                         # ✅ Write new structure — no stress_detected/anxiety_detected yet
                         rtdb.reference(f"active_session/{uid}").set({
                             "uid":    uid,
-                            "status": "pending"
+                            "firstname": st.session_state.first_name,
+                            "age": st.session_state.age,
+                            "gender": st.session_state.gender,
+                            "status": "pending",
+                            "timestamp": datetime.now().isoformat()
                         })
                         st.session_state.sensor_phase = "WAITING"
                         st.session_state.step = "SENSOR_TEST"
