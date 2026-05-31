@@ -289,14 +289,22 @@ def handle_input(val, display_question=None, display_answer=None):
                     assessment_data = {
                         "uid": uid,
                         "firstName": st.session_state.first_name,
+                        "age": st.session_state.age,
+                        "gender": st.session_state.gender,
                         "distress_types": ["Normal/Low Distress"],
                         "timestamp": datetime.now(),    
                     }
                     db.collection("Assessment_History").add(assessment_data)
+                    st.session_state.assessment_saved = True
+                    st.session_state.assessment_doc_id = assessment_ref[1].id
                 except Exception as e:
                     st.error(f"Error saving assessment data: {e}")
+            
+            if st.session_state.get("assessment_doc_id"):
+                st.caption(f"📁 Assessment summary saved to Firestore under ID: `{st.session_state.assessment_doc_id}`")
         
                 st.session_state.pending_bot_responses = [f"K10 complete (Score: {st.session_state.k10_score}). Your distress levels appear low!"]
+                
                 st.session_state.step = "END"
 
     elif st.session_state.step == "TIER2":
@@ -398,6 +406,8 @@ elif st.session_state.step == "RESULTS":
             assessment_data = {
                 "uid": uid,
                 "firstName": st.session_state.first_name,
+                "age": st.session_state.age,
+                "gender": st.session_state.gender,
                 "distress_types": distress_types if distress_types else ["Normal/Low Distress"],
                 "timestamp": datetime.now(),
             }
@@ -640,6 +650,8 @@ if st.session_state.step == "SENSOR_TEST":
                 doc_ref = db.collection("Sensor_Results").add({
                     "uid":            uid,
                     "firstName":      st.session_state.first_name,
+                    "age":            st.session_state.age,
+                    "gender":         st.session_state.gender,
                     "stress_status":  stress,
                     "anxiety_status": anxiety,
                     "timestamp":      datetime.now(),
