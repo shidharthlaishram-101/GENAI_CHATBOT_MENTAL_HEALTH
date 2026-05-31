@@ -291,7 +291,7 @@ def handle_input(val, display_question=None, display_answer=None):
                         "firstName": st.session_state.first_name,
                         "age": st.session_state.age,
                         "gender": st.session_state.gender,
-                        "distress_types": ["Normal/Low Distress"],
+                        "distress_types": ["Normal"],
                         "timestamp": datetime.now(),    
                     }
                     assessment_ref = db.collection("Assessment_History").add(assessment_data)
