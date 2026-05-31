@@ -302,10 +302,11 @@ def handle_input(val, display_question=None, display_answer=None):
                     
                 st.session_state.pending_bot_responses = [f"K10 complete (Score: {st.session_state.k10_score}). Your distress levels appear low!"]
                 
-                st.session_state.step = "END"
-
                 if st.session_state.get("assessment_doc_id"):
                     st.caption(f"📁 Assessment summary saved to Firestore under ID: `{st.session_state.assessment_doc_id}`")
+
+                st.session_state.step = "END"
+
 
     elif st.session_state.step == "TIER2":
         tool = st.session_state.current_tool
