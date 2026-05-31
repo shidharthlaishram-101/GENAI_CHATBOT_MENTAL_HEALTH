@@ -387,6 +387,9 @@ elif st.session_state.step == "RESULTS":
     # PSS-10 Threshold: 14+ indicates Moderate/High Stress
     if pss >= 14: distress_types.append("High Perceived Stress")
 
+    # PHQ-9, GAD-7, and PSS-10 scores don't meet thresholds but K10 was high - classify as "General Distress"
+    if phq < 10 and gad < 10 and pss < 14: distress_types.append("General Distress")
+
     st.session_state.distress_types = distress_types
 
     # Firebase Save Logic of the Assessment Summary 
