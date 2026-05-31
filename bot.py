@@ -301,10 +301,6 @@ def handle_input(val, display_question=None, display_answer=None):
                     st.error(f"Error saving assessment data: {e}")
                     
                 st.session_state.pending_bot_responses = [f"K10 complete (Score: {st.session_state.k10_score}). Your distress levels appear low!"]
-                
-                if st.session_state.get("assessment_doc_id"):
-                    st.caption(f"📁 Assessment summary saved to Firestore under ID: `{st.session_state.assessment_doc_id}`")
-
                 st.session_state.step = "END"
 
 
@@ -510,6 +506,9 @@ elif st.session_state.step == "RESULTS":
     
     if st.button("🔄 Restart Assessment"): reset_session()
 
+if st.session_state.step == "END":
+    if st.session_state.get("assessment_doc_id"):
+        st.caption(f"📁 Assessment summary saved to Firestore under ID: `{st.session_state.assessment_doc_id}`")
 
 if st.session_state.step == "SENSOR_TEST":
     st.title("📡 Sensor Analysis")
