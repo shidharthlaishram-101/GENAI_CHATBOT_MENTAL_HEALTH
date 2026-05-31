@@ -398,10 +398,14 @@ elif st.session_state.step == "RESULTS":
                 "distress_types": distress_types if distress_types else ["Normal/Low Distress"],
                 "timestamp": datetime.now(),
             }
-            db.collection("Assessment_History").add(assessment_data)
+            assessment_ref = db.collection("Assessment_History").add(assessment_data)
             st.session_state.assessment_saved = True
+            st.session_state.assessment_doc_id = assessment_ref[1].id
         except Exception as e:
             st.error(f"Error saving assessment data: {e}")
+    
+    if st.session_state.get("assessment_doc_id"):
+        st.caption(f"📁 Assessment summary saved to Firestore under ID: `{st.session_state.assessment_doc_id}`")
 
     st.divider()
 
@@ -647,7 +651,7 @@ if st.session_state.step == "SENSOR_TEST":
                 st.error(f"Error saving results: {e}")
         
         if st.session_state.get("sensor_doc_id"):
-                st.caption(f"📁 Results saved to Firestore under ID: `{st.session_state.sensor_doc_id}`")
+                st.caption(f"📁 Sensor Results saved to Firestore under ID: `{st.session_state.sensor_doc_id}`")
 
         if st.button("🔄 Restart Assessment"):
             reset_session()
